@@ -45,13 +45,13 @@ function main() {
     thirdCtx.fillRect(player.xpos, player.ypos, player.size, player.size);
     thirdCtx.stroke();
     
-    setInterval(update,1000);
+    setInterval(update, 75);
     setInterval(enemyMake(circle), 1000);
 }
 /*Score system*/
 function update(){
-    player.score += (player.level * 10);
-    if(player.score % 100 == 0){
+    player.score +=  player.level;
+    if(player.score % (player.level * 1000) == 0){
         player.level += 1;
     }
     fourthCtx.clearRect(0, 0, fourthCanvas.width, fourthCanvas.height);
