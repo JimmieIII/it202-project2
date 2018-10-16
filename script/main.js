@@ -1,70 +1,23 @@
-/* Background Set-up*/
-var canvas = document.getElementById("layer1");
-var ctx = canvas.getContext("2d");
-var fourthCanvas = document.getElementById("layer4");
-var fourthCtx = fourthCanvas.getContext("2d");
-/*Enemy Set-up*/
-var secondCanvas = document.getElementById("layer2");
-var secondCtx = secondCanvas.getContext("2d");
 /*Player Set-up*/
 var thirdCanvas = document.getElementById("layer3");
 var thirdCtx = thirdCanvas.getContext("2d");
+var benefitCanvas = document.getElementById("layer5");
+var benefitCtx = benefitCanvas.getContext("2d");
+var playerImg = document.getElementById("player");
+var benefitImg = document.getElementById("canteen");
+var gameOver = false;
 var player = {
     dir: 0,
     size: 25,
-    xpos: 225,
-    ypos: 425,
-    speed: 10,
+    x: 225,
+    y: 425,
+    speed: 5,
     score: 0,
     lives: 3,
-    level: 1
+    level: 1,
+    width: 40,
+    height: 40
 };
-main();
-
-function main() {
-    var circle = {
-        y: 0,
-        x: 0,
-        dir: 1,
-        radius: 8,
-        speed: 1
-    };
-    var background = new Image();
-    var numEnemy = 500;
-    var enemyCreation;
-    var count = 0;
-    var loop = 0;
-    /* Page Setup*/
-    background.src = "img/background.png";
-    background.onload = function() {
-        ctx.drawImage(background, 200, 500, background.width, background.height, 0, 0, background.width, background.height);
-    }
-    
-    
-    thirdCtx.fillStyle = "green";
-    thirdCtx.fillRect(player.xpos, player.ypos, player.size, player.size);
-    thirdCtx.stroke();
-    
-    setInterval(update, 75);
-    setInterval(enemyMake(circle), 1000);
-}
-/*Score system*/
-function update(){
-    player.score +=  player.level;
-    if(player.score % (player.level * 1000) == 0){
-        player.level += 1;
-    }
-    fourthCtx.clearRect(0, 0, fourthCanvas.width, fourthCanvas.height);
-    fourthCtx.font = "30px Trebuchet MS";
-    fourthCtx.fillText("Lives: ", 10, 25);
-    fourthCtx.fillText(player.lives, 100, 25);
-    fourthCtx.fillText("Score: ", 10, 55);
-    fourthCtx.fillText(player.score, 100, 55);
-    fourthCtx.fillText("Level: ", 10, 85);
-    fourthCtx.fillText(player.level, 100, 85);
-    
-    
-}
 /*Responsible for moving the player character*/
 document.addEventListener('keydown', function(event) {
     if(event.keyCode == 37) {
@@ -72,51 +25,74 @@ document.addEventListener('keydown', function(event) {
     } else if(event.keyCode == 39) {
         player.dir = 1;
     }
-    move();
-    player.dir = 0;
 });
-
-function move() {
-    player.xpos = player.xpos + (player.dir * player.speed);
+document.addEventListener('keyup', function(event) {
+    if(event.keyCode != 37 || event.keyCode != 39) {
+        player.dir = 0;
+    }
+});
+setTimeout(function move() {
+    if(gameOver) {
+        thirdCtx.clearRect(0, 0, thirdCanvas.width, thirdCanvas.height);
+        return;
+    }
+    player.x += (player.dir * player.speed);
     thirdCtx.clearRect(0, 0, thirdCanvas.width, thirdCanvas.height);
     thirdCtx.beginPath();
-    thirdCtx.fillStyle = "green";
-    thirdCtx.fillRect(player.xpos, player.ypos, player.size, player.size);
+    thirdCtx.drawImage(playerImg, player.x, player.y, player.width, player.height);
     thirdCtx.stroke();
-    if(player.xpos < (1 - player.size)) {
-        player.xpos = thirdCanvas.width;
-    } else if(player.xpos > thirdCanvas.width) {
-        player.xpos = (1 - player.size);
-    }
-    if(player.dir == 0) {
-        return;
+    if(player.x < (1 - player.size)) {
+        player.x = thirdCanvas.width;
+    } else if(player.x > thirdCanvas.width) {
+        player.x = (1 - player.size);
     }
     window.requestAnimationFrame(move);
-}
-/* Enemy creation and movement*/
+}, 1000);
+/* Benefit Object*/
 
-function enemyMake(circle) {
-    if(circle.y == 0) {
-        secondCtx = secondCtx;
-        secondCanvas = secondCanvas;
-        circle.x = getRandPos();;
-    }
-    secondCtx.clearRect(0, 0, secondCanvas.width, secondCanvas.height);
-    secondCtx.beginPath();
-    secondCtx.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI);
-        secondCtx.fillStyle = "brown";
-    secondCtx.fill()
-    secondCtx.stroke();
-    circle.y += circle.dir * circle.speed;
-    if(circle.y >= (secondCanvas.height - circle.radius)) {
-        secondCtx.clearRect(0, 0, secondCanvas.width, secondCanvas.height);
+function benefit() {
+    this.x = Math.floor(Math.random() * (benefitCanvas.width - 25)) + 25,
+    this.y = -50,
+    this.width = 25,
+    this.height = 25
+}
+var objHealth = new benefit();
+var nTimes = -1;
+callDraw();
+
+function drawBenefit() {
+    benefitCtx.clearRect(0, 0, benefitCanvas.width, benefitCanvas.height);
+    if(objHealth.y >= (benefitCanvas.height - 30)) {
         return;
     }
-    window.requestAnimationFrame((function() {
-        enemyMake(circle);
-    }));
+    if(player.x < objHealth.x + objHealth.width && player.x + player.width > objHealth.x && player.y < objHealth.y + objHealth.height && player.y + player.height > objHealth.y) {
+        delete objHealth;
+        player.lives++;
+        return;
+    }
+    if(gameOver) {
+        return;
+    }
+    objHealth.y += 1;
+    benefitCtx.beginPath();
+    benefitCtx.drawImage(benefitImg, objHealth.x, objHealth.y, objHealth.width, objHealth.height);
+    benefitCtx.stroke();
+    window.requestAnimationFrame(drawBenefit);
 };
 
-function getRandPos() {
-    return Math.floor(Math.random() * secondCanvas.width);
+function callDraw() {
+    objHealth = new benefit;
+    drawBenefit();
+    if(gameOver) {
+        return;
+    }
+    nTimes++;
+    setTimeout(callDraw, 15000 * nTimes);
 }
+/*Other script files*/
+$.getScript("/script/background.js", function() {
+    startBackground();
+});
+$.getScript("/script/enemy.js", function() {
+    startEnemy();
+});
