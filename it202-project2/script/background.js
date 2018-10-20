@@ -8,7 +8,7 @@ var badCtx = fourthCanvas.getContext("2d");
 function startBackground() {
     /* Page Setup*/
     var background = new Image();
-    background.src = "img/background.png";
+    background.src = "/it202-project2/img/background.png";
     background.onload = function() {
         ctx.drawImage(background, 200, 500, background.width, background.height, 0, 0, background.width, background.height);
     }
