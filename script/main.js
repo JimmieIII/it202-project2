@@ -90,9 +90,9 @@ function callDraw() {
     setTimeout(callDraw, 15000 * nTimes);
 }
 /*Other script files*/
-$.getScript("/it202-project2/script/background.js", function() {
+$.getScript("/script/background.js", function() {
     startBackground();
 });
-$.getScript("/it202-project2/script/enemy.js", function() {
+$.getScript("/script/enemy.js", function() {
     startEnemy();
 });
